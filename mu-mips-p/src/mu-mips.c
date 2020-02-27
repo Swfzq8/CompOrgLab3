@@ -394,7 +394,7 @@ void ID()
 // values read from register file are placed into two temporary registers called A and B. The values stored 
 // in A and B will be used in upcoming cycles by other stages (e.g., EX, or MEM). The lower 16 bits of
 // the IR is sign-extended to 32-bit and stored in temporary register called imm. The value stored in imm
-// register will be used in the next stage (i.e., EX).
+// register will be used in the next stage (i.e., EX).h
 
 	uint32_t instruction = 0;
 	instruction = IF_ID.IR;
