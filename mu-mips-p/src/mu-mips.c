@@ -400,13 +400,17 @@ void ID()
 /************************************************************/
 void IF()
 {
-	/*IMPLEMENT THIS*/
+/*IMPLEMENT THIS*/
 // IR <= Mem[PC]
 // PC <= PC + 4
 // The instruction is fetched from memory into the instruction register (IR) by using the current program
 // counter (PC). The PC is then incremented by 4 to address the next instruction. IR is used to hold the
 // instruction (that is 32-bit) that will be needed in subsequent cycle during the instruction decode stage.
 
+
+
+	IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
+	CURRENT_STATE.PC = CURRENT_STATE.PC + 4;
 
 
 
