@@ -327,6 +327,14 @@ void handle_pipeline()
 void WB()
 {
 	/*IMPLEMENT THIS*/
+// for register-register instruction: REGS[rd] <= ALUOutput
+// for register-immediate instruction: REGS[rt] <= ALUOutput
+// for load instruction: REGS[rt] <= LMD
+
+
+
+
+
 }
 
 /************************************************************/
@@ -335,6 +343,14 @@ void WB()
 void MEM()
 {
 	/*IMPLEMENT THIS*/
+// for load: LMD <= MEM[ALUOutput]
+// for store: MEM[ALUOutput] <= B
+// If the instruction is load, data is read from memory and stored in load memory data (LMD) register. If
+// it is a store instruction, then the value stored in register B is written into memory. The address of
+// memory to be accessed is the value computed in the previous stage and stored in ALUOutput register. 
+
+
+
 }
 
 /************************************************************/
@@ -343,6 +359,20 @@ void MEM()
 void EX()
 {
 	/*IMPLEMENT THIS*/
+// 	In this stage, we have an ALU that operates on the operands that were read in the previous stage. We
+// can perform one of three functions depending on the instruction type.
+// i) Memory Reference (load/store):
+// ALUOutput <= A + imm
+// ALU adds two operands to form the effective address and stores the result into a register called
+// ALUOutput.
+// ii) Register-register Operation
+// ALUOutput <= A op B
+// ALU performs the operation specified by the instruction on the values stored in temporary registers A
+// and B and places the result into ALUOutput.
+// iii) Register-Immediate Operation
+// ALUOutput <= A op imm
+// ALU performs the operation specified by the instruction on the value stored in temporary register A and
+// value in register imm and places the result into ALUOutput.
 }
 
 /************************************************************/
@@ -351,6 +381,18 @@ void EX()
 void ID()
 {
 	/*IMPLEMENT THIS*/
+
+// A <= REGS[rs]
+// B <= REGS[rt]
+// imm <= sign-extended immediate field of IR
+// In this stage, the instruction is decoded (i.e., opcode and operands are extracted), and the content of the
+// register file is read (rs and rt are the register specifiers that indicate which registers to read from). The
+// values read from register file are placed into two temporary registers called A and B. The values stored 
+// in A and B will be used in upcoming cycles by other stages (e.g., EX, or MEM). The lower 16 bits of
+// the IR is sign-extended to 32-bit and stored in temporary register called imm. The value stored in imm
+// register will be used in the next stage (i.e., EX).
+
+
 }
 
 /************************************************************/
@@ -359,6 +401,15 @@ void ID()
 void IF()
 {
 	/*IMPLEMENT THIS*/
+// IR <= Mem[PC]
+// PC <= PC + 4
+// The instruction is fetched from memory into the instruction register (IR) by using the current program
+// counter (PC). The PC is then incremented by 4 to address the next instruction. IR is used to hold the
+// instruction (that is 32-bit) that will be needed in subsequent cycle during the instruction decode stage.
+
+
+
+
 }
 
 
