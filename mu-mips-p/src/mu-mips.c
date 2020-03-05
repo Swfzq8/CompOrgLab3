@@ -391,6 +391,11 @@ void ID()
 // in A and B will be used in upcoming cycles by other stages (e.g., EX, or MEM). The lower 16 bits of
 // the IR is sign-extended to 32-bit and stored in temporary register called imm. The value stored in imm
 // register will be used in the next stage (i.e., EX).
+ int rs;
+ int rt;
+  IF_ID.A = CURRENT_STATE.REGS[rs];
+  IF_ID.B = CURRENT_STATE.REGS[rt];
+
 
 
 }
