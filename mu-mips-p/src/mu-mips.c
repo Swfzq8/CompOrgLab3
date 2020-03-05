@@ -396,14 +396,12 @@ void ID()
 // the IR is sign-extended to 32-bit and stored in temporary register called imm. The value stored in imm
 // register will be used in the next stage (i.e., EX).
 
-  IF_ID.A = CURRENT_STATE.REGS[rs];
-  IF_ID.B = CURRENT_STATE.REGS[rt];
 
 
 	uint32_t instruction = 0;
 	instruction = IF_ID.IR;
 
-	uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
+	uint32_t opcode, function, rs, rt, rd, sa, immediate, target;
 	uint64_t product, p1, p2;
 	
 	uint32_t addr, data;
@@ -422,6 +420,15 @@ void ID()
 	sa = (instruction & 0x000007C0) >> 6;
 	immediate = instruction & 0x0000FFFF;
 	target = instruction & 0x03FFFFFF;
+
+	ID_EX.A = CURRENT_STATE.REGS[rs];
+	ID_EX.B = CURRENT_STATE.REGS[rt];
+	ID_EX.imm = (int) immediate;
+	ID_EX.opcode = opcode;
+	ID_EX.rd = rd;
+	ID_EX.funct = function;
+	
+	
 	
 	
 
