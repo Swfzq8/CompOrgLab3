@@ -56,6 +56,9 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t opcode;
 	uint32_t HI;
 	uint32_t LO;
+	uint32_t rd;
+	uint32_t shamt;
+	uint32_t funct;
 	
 } CPU_Pipeline_Reg;
 
