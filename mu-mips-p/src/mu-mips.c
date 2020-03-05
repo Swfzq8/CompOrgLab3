@@ -351,6 +351,11 @@ void MEM()
 
 
 
+
+
+
+
+
 }
 
 /************************************************************/
@@ -358,6 +363,11 @@ void MEM()
 /************************************************************/
 void EX()
 {
+	if(ID_EX.opcode = 0b000000){
+
+	}else{
+		// check for load/store OR Register-imm
+	}
 	/*IMPLEMENT THIS*/
 // 	In this stage, we have an ALU that operates on the operands that were read in the previous stage. We
 // can perform one of three functions depending on the instruction type.
@@ -373,6 +383,11 @@ void EX()
 // ALUOutput <= A op imm
 // ALU performs the operation specified by the instruction on the value stored in temporary register A and
 // value in register imm and places the result into ALUOutput.
+
+
+
+
+
 
 	
 
