@@ -446,6 +446,37 @@ void print_program(){
 /************************************************************/
 void show_pipeline(){
 	/*IMPLEMENT THIS*/
+printf("Current PC: 0x%u \n",CURRENT_STATE.PC);
+printf("IF/ID.IR 0x%u \n",IF_ID.IR );
+printf("IF/ID.PC 0x%u \n",IF_ID.PC);
+printf("ID/EX.IR 0x%u \n",ID_EX.IR);
+printf("ID/EX.A 0x%u \n",ID_EX.A);
+printf("ID/EX.B 0x%u \n",ID_EX.B);
+printf("ID/EX.imm 0x%u \n",ID_EX.imm);
+printf("EX/MEM.IR 0x%u \n",EX_MEM.IR);
+printf("EX/MEM.A 0x%u \n",EX_MEM.A);
+printf("EX/MEM.B 0x%u \n",EX_MEM.B);
+printf("EX/MEM.ALU 0x%u \n",EX_MEM.ALUOutput);
+printf("MEM/WB.IR 0x%u \n",MEM_WB.IR);
+printf("MEM/WB.ALUOutput 0x%u \n",MEM_WB.ALUOutput);
+printf("MEM/WB.LMD 0x%u \n",MEM_WB.LMD);
+
+/*
+Current PC: value
+IF/ID.IR value instruction( e.g. add $1, $2, $3)
+IF/ID.PC value //notice that it contains the next PC
+ID/EX.IR value instruction
+ID/EX.A value
+ID/EX.B value
+ID/EX.imm value
+EX/MEM.IR value
+EX/MEM.A value
+EX/MEM.B value
+EX/MEM.ALUOutput value
+MEM/WB.IR value
+MEM/WB.ALUOutput value
+MEM/WB.LMD value
+*/
 }
 
 /***************************************************************/
