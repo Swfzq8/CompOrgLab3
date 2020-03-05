@@ -373,7 +373,11 @@ void EX()
 // ALUOutput <= A op imm
 // ALU performs the operation specified by the instruction on the value stored in temporary register A and
 // value in register imm and places the result into ALUOutput.
+
+	
+
 }
+
 
 /************************************************************/
 /* instruction decode (ID) pipeline stage:                                                         */ 
@@ -397,6 +401,9 @@ void ID()
   IF_ID.B = CURRENT_STATE.REGS[rt];
 
 
+	uint32_t instruction = 0;
+	instruction = IF_ID.IR;
+	
 
 }
 
