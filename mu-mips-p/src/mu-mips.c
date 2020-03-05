@@ -357,7 +357,14 @@ void MEM()
 
 
 }
+uint32_t aluoperation(uint32_t A, uint32_t B)
+{
+	uint32_t ouput = 0;
 
+	output = A + B;
+	
+	return output;
+}
 /************************************************************/
 /* execution (EX) pipeline stage:                                                                          */ 
 /************************************************************/
