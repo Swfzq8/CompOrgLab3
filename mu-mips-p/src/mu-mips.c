@@ -371,16 +371,39 @@ uint32_t aluoperation(uint32_t A, uint32_t B)
 void EX()
 {
 
-uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
+
+
+
+	/*IMPLEMENT THIS*/
+// 	In this stage, we have an ALU that operates on the operands that were read in the previous stage. We
+// can perform one of three functions depending on the instruction type.
+
+// i) Memory Reference (load/store):
+// ALUOutput <= A + imm
+// ALU adds two operands to form the effective address and stores the result into a register called
+// ALUOutput.
+
+// ii) Register-register Operation
+// ALUOutput <= A op B
+// ALU performs the operation specified by the instruction on the values stored in temporary registers A
+// and B and places the result into ALUOutput.
+
+
+// iii) Register-Immediate Operation
+// ALUOutput <= A op imm
+// ALU performs the operation specified by the instruction on the value stored in temporary register A and
+// value in register imm and places the result into ALUOutput.
+
+
+
+	uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
 	uint64_t product, p1, p2;
 	
 	uint32_t addr, data;
 	
 	int branch_jump = FALSE;
 	
-	printf("[0x%x]\t", CURRENT_STATE.PC);
 	
-	instruction = mem_read_32(CURRENT_STATE.PC);
 	
 	opcode = ID_EX.opcode;
 	function = ID_EX.funct;
@@ -390,46 +413,47 @@ uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
 	sa = ID_EX.shampt;
 	immediate = ID_EX.imm;
 	target = ID_EX.tar;
+	// uint32_t nextPC = ID_EX.PC + 4; 
 
 	if(opcode == 0x00){
 		switch(function){
-			case 0x00: //SLL
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << sa;
-				print_instruction(CURRENT_STATE.PC);
+			case 0x00: //SLL  -- R type 
+				ID_EX.ALUOutput = CURRENT_STATE.REGS[rt] << sa;
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x02: //SRL
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
-				print_instruction(CURRENT_STATE.PC);
+				ID_EX.ALUOutput = rt >> sa;
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x03: //SRA 
 				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 1)
 				{
-					NEXT_STATE.REGS[rd] =  ~(~CURRENT_STATE.REGS[rt] >> sa );
+					ID_EX.ALUOutput =  ~(~rt >> sa );
 				}
 				else{
-					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
+					ID_EX.ALUOutput = rt >> sa;
 				}
-				print_instruction(CURRENT_STATE.PC);
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x08: //JR
-				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
-				branch_jump = TRUE;
-				print_instruction(CURRENT_STATE.PC);
+				// nextPC = CURRENT_STATE.REGS[rs];
+				// branch_jump = TRUE;
+				// print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x09: //JALR
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
-				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
-				branch_jump = TRUE;
-				print_instruction(CURRENT_STATE.PC);
+				// NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
+				// NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				// branch_jump = TRUE;
+				// print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0C: //SYSCALL
 				if(CURRENT_STATE.REGS[2] == 0xa){
 					RUN_FLAG = FALSE;
-					print_instruction(CURRENT_STATE.PC);
+					print_instruction(ID_EX.PC);
 				}
 				break;
 			case 0x10: //MFHI
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+				ID_EX.ALUOutput = ID_EX.HI;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x11: //MTHI
@@ -532,58 +556,58 @@ uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
 		switch(opcode){
 			case 0x01:
 				if(rt == 0x00000){ //BLTZ
-					if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
-					}
-					print_instruction(CURRENT_STATE.PC);
+					// if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0){
+					// 	NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+					// 	branch_jump = TRUE;
+					// }
+					// print_instruction(CURRENT_STATE.PC);
 				}
 				else if(rt == 0x00001){ //BGEZ
-					if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
-						NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-						branch_jump = TRUE;
-					}
-					print_instruction(CURRENT_STATE.PC);
+					// if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
+					// 	NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+					// 	branch_jump = TRUE;
+					// }
+					// print_instruction(CURRENT_STATE.PC);
 				}
 				break;
 			case 0x02: //J
-				NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
-				branch_jump = TRUE;
-				print_instruction(CURRENT_STATE.PC);
+				// NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+				// branch_jump = TRUE;
+				// print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x03: //JAL
-				NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
-				NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
-				branch_jump = TRUE;
-				print_instruction(CURRENT_STATE.PC);
+				// NEXT_STATE.PC = (CURRENT_STATE.PC & 0xF0000000) | (target << 2);
+				// NEXT_STATE.REGS[31] = CURRENT_STATE.PC + 4;
+				// branch_jump = TRUE;
+				// print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x04: //BEQ
-				if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
-					NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-					branch_jump = TRUE;
-				}
-				print_instruction(CURRENT_STATE.PC);
+				// if(CURRENT_STATE.REGS[rs] == CURRENT_STATE.REGS[rt]){
+				// 	NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+				// 	branch_jump = TRUE;
+				// }
+				// print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x05: //BNE
-				if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
-					NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-					branch_jump = TRUE;
-				}
-				print_instruction(CURRENT_STATE.PC);
+				// if(CURRENT_STATE.REGS[rs] != CURRENT_STATE.REGS[rt]){
+				// 	NEXT_STATE.PC = CURRENT_STATE.PC + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+				// 	branch_jump = TRUE;
+				// }
+				// print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x06: //BLEZ
-				if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0 || CURRENT_STATE.REGS[rs] == 0){
-					NEXT_STATE.PC = CURRENT_STATE.PC +  ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-					branch_jump = TRUE;
-				}
-				print_instruction(CURRENT_STATE.PC);
+				// if((CURRENT_STATE.REGS[rs] & 0x80000000) > 0 || CURRENT_STATE.REGS[rs] == 0){
+				// 	NEXT_STATE.PC = CURRENT_STATE.PC +  ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+				// 	branch_jump = TRUE;
+				// }
+				// print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x07: //BGTZ
-				if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
-					NEXT_STATE.PC = CURRENT_STATE.PC +  ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
-					branch_jump = TRUE;
-				}
-				print_instruction(CURRENT_STATE.PC);
+				// if((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x0){
+				// 	NEXT_STATE.PC = CURRENT_STATE.PC +  ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000)<<2 : (immediate & 0x0000FFFF)<<2);
+				// 	branch_jump = TRUE;
+				// }
+				// print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x08: //ADDI
 				NEXT_STATE.REGS[rt] = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
@@ -662,25 +686,6 @@ uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate, target;
 	}
 
 
-
-
-
-
-	/*IMPLEMENT THIS*/
-// 	In this stage, we have an ALU that operates on the operands that were read in the previous stage. We
-// can perform one of three functions depending on the instruction type.
-// i) Memory Reference (load/store):
-// ALUOutput <= A + imm
-// ALU adds two operands to form the effective address and stores the result into a register called
-// ALUOutput.
-// ii) Register-register Operation
-// ALUOutput <= A op B
-// ALU performs the operation specified by the instruction on the values stored in temporary registers A
-// and B and places the result into ALUOutput.
-// iii) Register-Immediate Operation
-// ALUOutput <= A op imm
-// ALU performs the operation specified by the instruction on the value stored in temporary register A and
-// value in register imm and places the result into ALUOutput.
 
 
 
