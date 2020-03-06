@@ -456,19 +456,19 @@ void EX()
 				ID_EX.ALUOutput = ID_EX.HI;
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x11: //MTHI
+			case 0x11: //MTHI  -???
 				NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x12: //MFLO
+			case 0x12: //MFLO - ???  
 				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x13: //MTLO
+			case 0x13: //MTLO - ??? 
 				NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x18: //MULT
+			case 0x18: //MULT - ??? 
 				if ((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x80000000){
 					p1 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rs];
 				}else{
@@ -484,13 +484,13 @@ void EX()
 				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x19: //MULTU
+			case 0x19: //MULTU ???
 				product = (uint64_t)CURRENT_STATE.REGS[rs] * (uint64_t)CURRENT_STATE.REGS[rt];
 				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
 				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x1A: //DIV 
+			case 0x1A: //DIV  -???
 				if(CURRENT_STATE.REGS[rt] != 0)
 				{
 					NEXT_STATE.LO = (int32_t)CURRENT_STATE.REGS[rs] / (int32_t)CURRENT_STATE.REGS[rt];
@@ -498,7 +498,7 @@ void EX()
 				}
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x1B: //DIVU
+			case 0x1B: //DIVU -????
 				if(CURRENT_STATE.REGS[rt] != 0)
 				{
 					NEXT_STATE.LO = CURRENT_STATE.REGS[rs] / CURRENT_STATE.REGS[rt];
@@ -507,48 +507,48 @@ void EX()
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x20: //ADD
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] + CURRENT_STATE.REGS[rt];
+				ID_EX.ALUOutput = rs + rt;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x21: //ADDU 
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] + CURRENT_STATE.REGS[rs];
-				print_instruction(CURRENT_STATE.PC);
+				ID_EX.ALUOutput = rt + rs;
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x22: //SUB
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
-				print_instruction(CURRENT_STATE.PC);
+				ID_EX.ALUOutput = rs - rt;
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x23: //SUBU
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] - CURRENT_STATE.REGS[rt];
-				print_instruction(CURRENT_STATE.PC);
+				ID_EX.ALUOutput = rs - rt;
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x24: //AND
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] & CURRENT_STATE.REGS[rt];
-				print_instruction(CURRENT_STATE.PC);
+				ID_EX.ALUOutput = rs & rt;
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x25: //OR
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt];
-				print_instruction(CURRENT_STATE.PC);
+				ID_EX.ALUOutput = rs | rt;
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x26: //XOR
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rs] ^ CURRENT_STATE.REGS[rt];
-				print_instruction(CURRENT_STATE.PC);
+				ID_EX.ALUOutput = rs ^ rt;
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x27: //NOR
-				NEXT_STATE.REGS[rd] = ~(CURRENT_STATE.REGS[rs] | CURRENT_STATE.REGS[rt]);
-				print_instruction(CURRENT_STATE.PC);
+				ID_EX.ALUOutput = ~(rs | rt);
+				print_instruction(ID_EX.PC);
 				break;
 			case 0x2A: //SLT
-				if(CURRENT_STATE.REGS[rs] < CURRENT_STATE.REGS[rt]){
-					NEXT_STATE.REGS[rd] = 0x1;
+				if(rs < rt){
+					ID_EX.ALUOutput = 0x1;
 				}
 				else{
-					NEXT_STATE.REGS[rd] = 0x0;
+					ID_EX = 0x0;
 				}
-				print_instruction(CURRENT_STATE.PC);
+				print_instruction(ID_EX.PC);
 				break;
 			default:
-				printf("Instruction at 0x%x is not implemented!\n", CURRENT_STATE.PC);
+				printf("Instruction at 0x%x is not implemented!\n", ID_EX.PC);
 				break;
 		}
 	}
