@@ -59,7 +59,8 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t rd;
 	uint32_t funct;
 	uint32_t shampt;
-	
+	uint32_t tar;
+
 } CPU_Pipeline_Reg;
 
 /***************************************************************/
