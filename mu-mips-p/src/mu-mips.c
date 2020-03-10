@@ -331,7 +331,62 @@ void WB()
 // for register-immediate instruction: REGS[rt] <= ALUOutput
 // for load instruction: REGS[rt] <= LMD
 
-
+	switch(MEM_WB.opcode){
+		
+		case 0x20://LB
+			RNEXT_STATE.REGS[rt] = MEM_WB.LMD;
+			break;
+		case 0x21://LH
+			NEXT_STATE.REGS[rt] = MEM_WB.LMD;
+			break;
+		case 0x23://LW
+			NEXT_STATE.REGS[rt] = MEM_WB.LMD;
+			break;
+		case 0x20: //ADD
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x21: //ADDU 
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x22: //SUB
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x23: //SUBU
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x24: //AND
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x25: //OR
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x26: //XOR
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x27: //NOR
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x08: //ADDI
+			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			break;
+		case 0x09: //ADDIU
+			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			break;
+		case 0x0A: //SLTI
+			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			break;
+		case 0x0C: //ANDI
+			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			break;
+		case 0x0D: //ORI
+			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			break;
+		case 0x0E: //XORI
+			NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+			break;
+		default:
+			printf("operation not implemented yet\n");
+	}
 
 
 
@@ -356,7 +411,7 @@ void MEM()
 		if(EX_MEM.opcode = 0x00){
 			return;
 		}
-
+		MEM_WB.opcode = EX_MEM.opcode;
 		switch(EX_MEM.opcode){
 			case 0x20: //LB
 				data = mem_read_32(EX_MEM.ALUOutput);
@@ -369,24 +424,66 @@ void MEM()
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x23: //LW
-				EX_MEM.ALUOutput = mem_read_32(EX_MEM.ALUOutput);
+				MEM_WB.ALUOutput = mem_read_32(EX_MEM.ALUOutput);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x28: //SB
 				data = mem_read_32(EX_MEM.ALUOutput);
 				EX_MEM.B = (data & 0xFFFFFF00) | (EX_MEM.B & 0x000000FF);
-				mem_write_32(EX_MEM.ALUOutput, EX_MEM.B);
+				mem_write_32(EX_MEM.ALUOutput, MEM_WB.B);
 				print_instruction(ID_EX.PC);				
 				break;
 			case 0x29: //SH
 				data = mem_read_32(EX_MEM.ALUOutput);
 				EX_MEM.B = (data & 0xFFFF0000) | (EX_MEM.B & 0x0000FFFF);
-				mem_write_32(EX_MEM.ALUOutput, EX_MEM.B);
+				mem_write_32(EX_MEM.ALUOutput, MEM_WB.B);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x2B: //SW
-				mem_write_32(EX_MEM.ALUOutput, EX_MEM.B);
+				mem_write_32(EX_MEM.ALUOutput,MEM_WB.B);
 				print_instruction(ID_EX.PC);
+				break;
+			case 0x20: //ADD
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x21: //ADDU 
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x22: //SUB
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x23: //SUBU
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x24: //AND
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x25: //OR
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x26: //XOR
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x27: //NOR
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x08: //ADDI
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x09: //ADDIU
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x0A: //SLTI
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x0C: //ANDI
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x0D: //ORI
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				break;
+			case 0x0E: //XORI
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput
 				break;
 			default:
 				// put more things here
@@ -723,15 +820,6 @@ void EX()
 		NEXT_STATE.PC = ID_EX.PC + 4;
 	}
 
-
-
-
-
-
-
-
-	
-
 }
 
 
@@ -786,8 +874,6 @@ void ID()
 	ID_EX.shampt = sa;
 	ID_EX.tar = target;
 	
-	
-
 }
 
 /************************************************************/
