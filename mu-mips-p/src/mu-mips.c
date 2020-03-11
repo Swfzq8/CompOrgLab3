@@ -29,7 +29,7 @@ void help() {
 
 void print_instruction(uint32_t addr){
 	
-	printf("print_instruction has not been implemented yet\n");
+	// printf("print_instruction has not been implemented yet\n");
 
 	return;
 }
@@ -366,7 +366,7 @@ void WB()
 			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
 			break;
 		default:
-		printf("operation not implemented yet\n");
+		printf("operation not implemented yet wb %x\n", MEM_WB.funct);
 		}
 	else {
 		switch(MEM_WB.opcode){
@@ -399,7 +399,7 @@ void WB()
 				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
 				break;
 			default:
-				printf("operation not implemented yet\n");
+				printf("operation not implemented yet wb2\n");
 		}
 	}
 	
@@ -422,9 +422,11 @@ void MEM()
 // it is a store instruction, then the value stored in register B is written into memory. The address of
 // memory to be accessed is the value computed in the previous stage and stored in ALUOutput register. 	
 	uint32_t data;
-	MEM_WB.B = ID_EX.A;
-	MEM_WB.rd = ID_EX.rd;
-	MEM_WB.funct = ID_EX.funct;
+		MEM_WB.B = EX_MEM.A;
+
+	MEM_WB.B = EX_MEM.B;
+	MEM_WB.rd = EX_MEM.rd;
+	MEM_WB.funct = EX_MEM.funct;
 	MEM_WB.opcode = EX_MEM.opcode;
 
 		if(EX_MEM.opcode == 0x00){
@@ -472,7 +474,7 @@ void MEM()
 					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 					break;
 				default:
-					printf("operation not implemented yet\n");
+					printf("operation not implemented yet mem\n");
 			}	
 			return;
 		}
@@ -510,7 +512,7 @@ void MEM()
 				break;
 			default:
 				// put more things here
-				printf("Instruction at 0x%x is not implemented!\n", ID_EX.PC);
+				printf("Instruction at 0x%x is not implemented! mem2\n", ID_EX.PC);
 				break;
 
 		}
@@ -573,6 +575,9 @@ void EX()
 	EX_MEM.A = rs;
 	EX_MEM.B = rt;
 	EX_MEM.rd = rd;
+	EX_MEM.funct = function;
+	EX_MEM.shampt = ID_EX.shampt;
+
 	sa = ID_EX.shampt;
 
 	// uint32_t nextPC = ID_EX.PC + 4; 
@@ -841,10 +846,6 @@ void EX()
 				break;
 		}
 	}
-	
-	if(!branch_jump){					
-		NEXT_STATE.PC = ID_EX.PC;
-	}
 
 }
 
@@ -876,8 +877,6 @@ void ID()
 	
 	
 	
-	instruction = mem_read_32(IF_ID.PC);
-	
 	opcode = (instruction & 0xFC000000) >> 26;
 	function = instruction & 0x0000003F;
 	rs = (instruction & 0x03E00000) >> 21;
@@ -895,6 +894,7 @@ void ID()
 	ID_EX.funct = function;
 	ID_EX.shampt = sa;
 	ID_EX.tar = target;
+	printf("%x",instruction);
 	
 }
 
@@ -913,7 +913,7 @@ void IF()
 
 	IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
 	IF_ID.PC = CURRENT_STATE.PC + 4;
-
+	NEXT_STATE.PC = CURRENT_STATE.PC + 4;
 
 }
 
