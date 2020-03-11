@@ -556,7 +556,7 @@ void EX()
 
 
 
-	uint32_t instruction, opcode, function, rs, rt, rd, sa, immediate;
+	uint32_t opcode, function, rs, rt, rd, sa, immediate;
 	uint32_t target;
 	uint64_t product, p1, p2;
 	//uint32_t addr; unused variable
@@ -573,6 +573,7 @@ void EX()
 	EX_MEM.A = rs;
 	EX_MEM.B = rt;
 	EX_MEM.rd = rd;
+	sa = ID_EX.shampt;
 
 	// uint32_t nextPC = ID_EX.PC + 4; 
 
@@ -871,11 +872,8 @@ void ID()
 	instruction = IF_ID.IR;
 
 	uint32_t opcode, function, rs, rt, rd, sa, immediate, target;
-	uint64_t product, p1, p2;
 	
-	uint32_t addr, data;
 	
-	int branch_jump = FALSE;
 	
 	
 	instruction = mem_read_32(IF_ID.PC);
