@@ -331,10 +331,12 @@ void WB()
 // for register-immediate instruction: REGS[rt] <= ALUOutput
 // for load instruction: REGS[rt] <= LMD
 
+
 	switch(MEM_WB.opcode){
-		
+		uint32_t rt = MEM_WB.B;
+		uint32_t rd = MEM_WB.rd;  
 		case 0x20://LB
-			RNEXT_STATE.REGS[rt] = MEM_WB.LMD;
+			NEXT_STATE.REGS[rt] = MEM_WB.LMD;
 			break;
 		case 0x21://LH
 			NEXT_STATE.REGS[rt] = MEM_WB.LMD;
@@ -406,6 +408,8 @@ void MEM()
 // it is a store instruction, then the value stored in register B is written into memory. The address of
 // memory to be accessed is the value computed in the previous stage and stored in ALUOutput register. 	
 	uint32_t data;
+	MEM_WB.B = ID_EX.A;
+	MEM_WB.rd = ID_EX.rd;
 
 
 		if(EX_MEM.opcode = 0x00){
@@ -444,46 +448,46 @@ void MEM()
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x20: //ADD
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x21: //ADDU 
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x22: //SUB
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x23: //SUBU
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x24: //AND
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x25: //OR
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x26: //XOR
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x27: //NOR
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x08: //ADDI
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x09: //ADDIU
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x0A: //SLTI
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x0C: //ANDI
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x0D: //ORI
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			case 0x0E: //XORI
-				MEM_WB.ALUOutput = EX_MEM.ALUOutput
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				break;
 			default:
 				// put more things here
@@ -817,7 +821,7 @@ void EX()
 	}
 	
 	if(!branch_jump){					
-		NEXT_STATE.PC = ID_EX.PC + 4;
+		NEXT_STATE.PC = ID_EX.PC;
 	}
 
 }
@@ -852,9 +856,8 @@ void ID()
 	
 	int branch_jump = FALSE;
 	
-	printf("[0x%x]\t", ID_EX.PC);
 	
-	instruction = mem_read_32(ID_EX.PC);
+	instruction = mem_read_32(IF_ID.PC);
 	
 	opcode = (instruction & 0xFC000000) >> 26;
 	function = instruction & 0x0000003F;
@@ -889,10 +892,8 @@ void IF()
 // instruction (that is 32-bit) that will be needed in subsequent cycle during the instruction decode stage.
 
 
-
-	IF_ID.IR = mem_read_32(ID_EX.PC);
-	ID_EX.PC = ID_EX.PC + 4;
-
+	IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
+	IF_ID.PC = CURRENT_STATE.PC + 4;
 
 
 }
