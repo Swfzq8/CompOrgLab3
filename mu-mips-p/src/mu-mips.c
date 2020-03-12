@@ -921,7 +921,7 @@ void IF()
 /************************************************************/
 /* Initialize Memory                                                                                                    */ 
 /************************************************************/
-void initialize() { 
+void initialize() { //updated initialize
 	init_memory();
 	ID_EX.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
@@ -929,7 +929,7 @@ void initialize() {
 }
 
 /************************************************************/
-/* Print the program loaded into memory (in MIPS assembly format)    */ 
+/* Print the program loaded into memory (in MIPS assembly format)     */ 
 /************************************************************/
 void print_program(){
 	/*IMPLEMENT THIS*/
