@@ -928,15 +928,15 @@ void EX()
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x0C: //ANDI
-				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] & (immediate & 0x0000FFFF);
+				EX_MEM.ALUOutput = rs & (immediate & 0x0000FFFF);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x0D: //ORI
-				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] | (immediate & 0x0000FFFF);
+				EX_MEM.ALUOutput = rs | (immediate & 0x0000FFFF);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x0E: //XORI
-				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] ^ (immediate & 0x0000FFFF);
+				EX_MEM.ALUOutput = rs ^ (immediate & 0x0000FFFF);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x0F: //LUI
@@ -944,34 +944,34 @@ void EX()
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x20: //LB
-				data = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				data = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
 				EX_MEM.ALUOutput = data;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x21: //LH
-				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) ;
+				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) ;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x23: //LW
-				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) ;
+				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) ;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x28: //SB
-				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
 				// data = mem_read_32( addr);
 				// data = (data & 0xFFFFFF00) | (rt & 0x000000FF);
 				// mem_write_32(addr, data);
 				print_instruction(ID_EX.PC);				
 				break;
 			case 0x29: //SH
-				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
 				// data = mem_read_32( addr);
 				// data = (data & 0xFFFF0000) | (rt & 0x0000FFFF);
 				// mem_write_32(addr, data);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x2B: //SW
-				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
 				// mem_write_32(addr, rt);
 				print_instruction(ID_EX.PC);
 				break;
@@ -1021,8 +1021,8 @@ void ID()
 	immediate = instruction & 0x0000FFFF;
 	target = instruction & 0x03FFFFFF;
 
-	ID_EX.A = rs;
-	ID_EX.B = rt;
+	ID_EX.A = CURRENT_STATE.REGS[rs];
+	ID_EX.B = CURRENT_STATE.REGS[rt];
 	ID_EX.imm = (int) immediate;
 	ID_EX.opcode = opcode;
 	ID_EX.rd = rd;
