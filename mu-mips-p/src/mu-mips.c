@@ -330,7 +330,7 @@ void WB()
 // for register-register instruction: REGS[rd] <= ALUOutput
 // for register-immediate instruction: REGS[rt] <= ALUOutput
 // for load instruction: REGS[rt] <= LMD
-	uint32_t rt = MEM_WB.B;
+	uint32_t rt = MEM_WB.regA;
 	uint32_t rd = MEM_WB.rd;  
 	
 	
@@ -487,6 +487,8 @@ void MEM()
 	uint32_t data;
 	MEM_WB.A = EX_MEM.A;
 	MEM_WB.B = EX_MEM.B;
+	MEM_WB.regA = EX_MEM.regA;
+	MEM_WB.regB = EX_MEM.regB;
 	MEM_WB.rd = EX_MEM.rd;
 	MEM_WB.funct = EX_MEM.funct;
 	MEM_WB.opcode = EX_MEM.opcode;
@@ -712,6 +714,8 @@ void EX()
 	EX_MEM.opcode = opcode;
 	EX_MEM.A = rs;
 	EX_MEM.B = rt;
+	ID_EX.regA = IF_ID.regA;
+	ID_EX.regB = IF_ID.regB;
 	EX_MEM.rd = rd;
 	EX_MEM.funct = function;
 	EX_MEM.shampt = ID_EX.shampt;
@@ -1023,6 +1027,8 @@ void ID()
 
 	ID_EX.A = CURRENT_STATE.REGS[rs];
 	ID_EX.B = CURRENT_STATE.REGS[rt];
+	ID_EX.regA = rs;
+	ID_EX.regB = rt;
 	ID_EX.imm = (int) immediate;
 	ID_EX.opcode = opcode;
 	ID_EX.rd = rd;
