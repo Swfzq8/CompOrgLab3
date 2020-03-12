@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "mu-mips.h"
-
+void print_instruction(uint32_t);
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -25,13 +25,6 @@ void help() {
 	printf("?\t-- display help menu\n");
 	printf("quit\t-- exit the simulator\n\n");
 	printf("------------------------------------------------------------------\n\n");
-}
-
-void print_instruction(uint32_t addr){
-	
-	// printf("print_instruction has not been implemented yet\n");
-
-	return;
 }
 
 /***************************************************************/
@@ -237,7 +230,7 @@ void handle_command() {
 			break;
 		case 'P':
 		case 'p':
-			print_program(); 
+		//	print_program(); 
 			break;
 		default:
 			printf("Invalid Command.\n");
@@ -334,78 +327,6 @@ void handle_pipeline()
 void WB()
 {
 	/*IMPLEMENT THIS*/
-// for register-register instruction: REGS[rd] <= ALUOutput
-// for register-immediate instruction: REGS[rt] <= ALUOutput
-// for load instruction: REGS[rt] <= LMD
-			uint32_t rt = MEM_WB.B;
-			uint32_t rd = MEM_WB.rd;  
-	if(MEM_WB.opcode == 0x00)
-		switch(MEM_WB.funct){
-		case 0x20: //ADD
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			break;
-		case 0x21: //ADDU 
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			break;
-		case 0x22: //SUB
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			break;
-		case 0x23: //SUBU
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			break;
-		case 0x24: //AND
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			break;
-		case 0x25: //OR
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			break;
-		case 0x26: //XOR
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			break;
-		case 0x27: //NOR
-			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
-			break;
-		default:
-		printf("operation not implemented yet wb %x\n", MEM_WB.funct);
-		}
-	else {
-		switch(MEM_WB.opcode){
-			
-			case 0x20://LB
-				NEXT_STATE.REGS[rt] = MEM_WB.LMD;
-				break;
-			case 0x21://LH
-				NEXT_STATE.REGS[rt] = MEM_WB.LMD;
-				break;
-			case 0x23://LW
-				NEXT_STATE.REGS[rt] = MEM_WB.LMD;
-				break;
-			case 0x08: //ADDI
-				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
-				break;
-			case 0x09: //ADDIU
-				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
-				break;
-			case 0x0A: //SLTI
-				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
-				break;
-			case 0x0C: //ANDI
-				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
-				break;
-			case 0x0D: //ORI
-				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
-				break;
-			case 0x0E: //XORI
-				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
-				break;
-			default:
-				printf("operation not implemented yet wb2\n");
-		}
-	}
-	
-
-
-
 }
 
 /************************************************************/
@@ -483,7 +404,7 @@ void MEM()
 			case 0x20: //LB
 				data = mem_read_32(EX_MEM.ALUOutput);
 				MEM_WB.LMD = ((data & 0x000000FF) & 0x80) > 0 ? (data | 0xFFFFFF00) : (data & 0x000000FF);
-				print_instruction(ID_EX.PC);
+			//	print_instruction(ID_EX.PC);
 				break;						
 			case 0x21: //LH
 				data = mem_read_32(EX_MEM.ALUOutput);
@@ -526,6 +447,7 @@ void MEM()
 
 
 }
+
 
 /************************************************************/
 /* execution (EX) pipeline stage:                                                                          */ 
@@ -912,6 +834,7 @@ void IF()
 
 
 	IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
+	printf(" the current state is %x", CURRENT_STATE.PC);
 	IF_ID.PC = CURRENT_STATE.PC + 4;
 	NEXT_STATE.PC = CURRENT_STATE.PC + 4;
 
@@ -921,18 +844,18 @@ void IF()
 /************************************************************/
 /* Initialize Memory                                                                                                    */ 
 /************************************************************/
-void initialize() { //updated initialize
+void initialize() { 
 	init_memory();
-	ID_EX.PC = MEM_TEXT_BEGIN;
+	CURRENT_STATE.PC = MEM_TEXT_BEGIN;
 	NEXT_STATE = CURRENT_STATE;
 	RUN_FLAG = TRUE;
 }
 
 /************************************************************/
-/* Print the program loaded into memory (in MIPS assembly format)     */ 
+/* Print the program loaded into memory (in MIPS assembly format)    */ 
 /************************************************************/
-void print_program(){
-	/*IMPLEMENT THIS*/
+void print_instruction(uint32_t j){
+	printf("the instruction is %x",j);/*IMPLEMENT THIS*/
 }
 
 /************************************************************/
@@ -940,7 +863,7 @@ void print_program(){
 /************************************************************/
 void show_pipeline(){
 	/*IMPLEMENT THIS*/
-printf("Current PC: 0x%u \n",ID_EX.PC);
+printf("Current PC: 0x%u \n",CURRENT_STATE.PC);
 printf("IF/ID.IR 0x%u \n",IF_ID.IR );
 printf("IF/ID.PC 0x%u \n",IF_ID.PC);
 printf("ID/EX.IR 0x%u \n",ID_EX.IR);
@@ -972,7 +895,6 @@ MEM/WB.ALUOutput value
 MEM/WB.LMD value
 */
 }
-
 /***************************************************************/
 /* main                                                                                                                                   */
 /***************************************************************/
