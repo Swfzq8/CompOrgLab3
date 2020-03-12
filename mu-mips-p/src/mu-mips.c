@@ -332,59 +332,51 @@ void WB()
 // for load instruction: REGS[rt] <= LMD
 	uint32_t rt = MEM_WB.B;
 	uint32_t rd = MEM_WB.rd;  
-	uint32_t rs = MEM_WB.A;
-	uint8_t sa = MEM_WB.shampt; 
+	
+	
 
 	if(MEM_WB.opcode == 0x00)
 		switch(MEM_WB.funct){
 
 
 			case 0x00: //SLL
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << sa;
+				NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x02: //SRL
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
+				NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x03: //SRA 
-				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 1)
-				{
-					NEXT_STATE.REGS[rd] =  ~(~CURRENT_STATE.REGS[rt] >> sa );
-				}
-				else{
-					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
-				}
+				NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x08: //JR
-				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				NEXT_STATE.PC = MEM_WB.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
-			case 0x09: //JALR
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
-				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+			case 0x09: //JALR	
+				NEXT_STATE.PC = MEM_WB.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0C: //SYSCALL
 				if(CURRENT_STATE.REGS[2] == 0xa){
-					print_instruction(CURRENT_STATE.PC);
 				}
 				break;
 			case 0x10: //MFHI
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+				NEXT_STATE.REGS[rd] = MEM_WB.HI;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x11: //MTHI
-				NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
+				NEXT_STATE.HI = MEM_WB.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x12: //MFLO
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
+				NEXT_STATE.REGS[rd] = MEM_WB.HI;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x13: //MTLO
-				NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
+				NEXT_STATE.LO = MEM_WB.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x18: //MULT
