@@ -485,7 +485,7 @@ void MEM()
 // it is a store instruction, then the value stored in register B is written into memory. The address of
 // memory to be accessed is the value computed in the previous stage and stored in ALUOutput register. 	
 	uint32_t data;
-	MEM_WB.B = EX_MEM.A;
+	MEM_WB.A = EX_MEM.A;
 	MEM_WB.B = EX_MEM.B;
 	MEM_WB.rd = EX_MEM.rd;
 	MEM_WB.funct = EX_MEM.funct;
@@ -633,7 +633,7 @@ void MEM()
 			case 0x28: //SB
 				data = mem_read_32(EX_MEM.ALUOutput);
 				EX_MEM.B = (data & 0xFFFFFF00) | (EX_MEM.B & 0x000000FF);
-				mem_write_32(EX_MEM.ALUOutput, MEM_WB.B);
+				mem_write_32(EX_MEM.ALUOutput, EX_MEM.B);
 				print_instruction(ID_EX.PC);				
 				break;
 			case 0x29: //SH
@@ -644,7 +644,7 @@ void MEM()
 				break;
 			case 0x2B: //SW
 				printf("store word #################################\nValue: %x\nREGister: %x\n################################\n",EX_MEM.ALUOutput,CURRENT_STATE.REGS[MEM_WB.B]);
-				mem_write_32(EX_MEM.ALUOutput,CURRENT_STATE.REGS[MEM_WB.B]);
+				mem_write_32(EX_MEM.ALUOutput,CURRENT_STATE.REGS[EX_MEM.B]);
 				print_instruction(ID_EX.PC);
 				break;
 			default:
