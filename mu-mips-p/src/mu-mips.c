@@ -330,10 +330,111 @@ void WB()
 // for register-register instruction: REGS[rd] <= ALUOutput
 // for register-immediate instruction: REGS[rt] <= ALUOutput
 // for load instruction: REGS[rt] <= LMD
-			uint32_t rt = MEM_WB.B;
-			uint32_t rd = MEM_WB.rd;  
+	uint32_t rt = MEM_WB.B;
+	uint32_t rd = MEM_WB.rd;  
+
 	if(MEM_WB.opcode == 0x00)
 		switch(MEM_WB.funct){
+
+
+			case 0x00: //SLL
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << sa;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x02: //SRL
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x03: //SRA 
+				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 1)
+				{
+					NEXT_STATE.REGS[rd] =  ~(~CURRENT_STATE.REGS[rt] >> sa );
+				}
+				else{
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x08: //JR
+				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				branch_jump = TRUE;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x09: //JALR
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.PC + 4;
+				NEXT_STATE.PC = CURRENT_STATE.REGS[rs];
+				branch_jump = TRUE;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x0C: //SYSCALL
+				if(CURRENT_STATE.REGS[2] == 0xa){
+					RUN_FLAG = FALSE;
+					print_instruction(CURRENT_STATE.PC);
+				}
+				break;
+			case 0x10: //MFHI
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x11: //MTHI
+				NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x12: //MFLO
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x13: //MTLO
+				NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x18: //MULT
+				if ((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x80000000){
+					p1 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rs];
+				}else{
+					p1 = 0x00000000FFFFFFFF & CURRENT_STATE.REGS[rs];
+				}
+				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 0x80000000){
+					p2 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rt];
+				}else{
+					p2 = 0x00000000FFFFFFFF & CURRENT_STATE.REGS[rt];
+				}
+				product = p1 * p2;
+				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
+				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x19: //MULTU
+				product = (uint64_t)CURRENT_STATE.REGS[rs] * (uint64_t)CURRENT_STATE.REGS[rt];
+				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
+				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x1A: //DIV 
+				if(CURRENT_STATE.REGS[rt] != 0)
+				{
+					NEXT_STATE.LO = (int32_t)CURRENT_STATE.REGS[rs] / (int32_t)CURRENT_STATE.REGS[rt];
+					NEXT_STATE.HI = (int32_t)CURRENT_STATE.REGS[rs] % (int32_t)CURRENT_STATE.REGS[rt];
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x1B: //DIVU
+				if(CURRENT_STATE.REGS[rt] != 0)
+				{
+					NEXT_STATE.LO = CURRENT_STATE.REGS[rs] / CURRENT_STATE.REGS[rt];
+					NEXT_STATE.HI = CURRENT_STATE.REGS[rs] % CURRENT_STATE.REGS[rt];
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+
+
+
+
+
+
+
+
+
 		case 0x20: //ADD
 			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
 			break;
@@ -362,8 +463,11 @@ void WB()
 		printf("operation not implemented yet wb %x\n", MEM_WB.funct);
 		}
 	else {
+
 		switch(MEM_WB.opcode){
-			
+			case 0x0F: //LUI
+				NEXT_STATE.REGS[rt] = MEM_WB.LMD;
+				break;
 			case 0x20://LB
 				NEXT_STATE.REGS[rt] = MEM_WB.LMD;
 				break;
@@ -391,6 +495,10 @@ void WB()
 			case 0x0E: //XORI
 				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
 				break;
+			case 0x09: //ADDIU
+				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+				break;
+
 			default:
 				printf("operation not implemented yet wb2\n");
 		}
@@ -423,6 +531,91 @@ void MEM()
 
 		if(EX_MEM.opcode == 0x00){
 			switch(EX_MEM.funct){
+
+			case 0x00: //SLL
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << sa;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x02: //SRL
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x03: //SRA 
+				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 1)
+				{
+					NEXT_STATE.REGS[rd] =  ~(~CURRENT_STATE.REGS[rt] >> sa );
+				}
+				else{
+					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+
+			case 0x0C: //SYSCALL
+				if(CURRENT_STATE.REGS[2] == 0xa){
+					RUN_FLAG = FALSE;
+					print_instruction(CURRENT_STATE.PC);
+				}
+				break;
+			case 0x10: //MFHI
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x11: //MTHI
+				NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x12: //MFLO
+				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x13: //MTLO
+				NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x18: //MULT
+				if ((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x80000000){
+					p1 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rs];
+				}else{
+					p1 = 0x00000000FFFFFFFF & CURRENT_STATE.REGS[rs];
+				}
+				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 0x80000000){
+					p2 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rt];
+				}else{
+					p2 = 0x00000000FFFFFFFF & CURRENT_STATE.REGS[rt];
+				}
+				product = p1 * p2;
+				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
+				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x19: //MULTU
+				product = (uint64_t)CURRENT_STATE.REGS[rs] * (uint64_t)CURRENT_STATE.REGS[rt];
+				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
+				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x1A: //DIV 
+				if(CURRENT_STATE.REGS[rt] != 0)
+				{
+					NEXT_STATE.LO = (int32_t)CURRENT_STATE.REGS[rs] / (int32_t)CURRENT_STATE.REGS[rt];
+					NEXT_STATE.HI = (int32_t)CURRENT_STATE.REGS[rs] % (int32_t)CURRENT_STATE.REGS[rt];
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+			case 0x1B: //DIVU
+				if(CURRENT_STATE.REGS[rt] != 0)
+				{
+					NEXT_STATE.LO = CURRENT_STATE.REGS[rs] / CURRENT_STATE.REGS[rt];
+					NEXT_STATE.HI = CURRENT_STATE.REGS[rs] % CURRENT_STATE.REGS[rt];
+				}
+				print_instruction(CURRENT_STATE.PC);
+				break;
+
+
+
+
+
 				case 0x20: //ADD
 					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 					break;
