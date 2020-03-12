@@ -327,8 +327,79 @@ void handle_pipeline()
 void WB()
 {
 	/*IMPLEMENT THIS*/
-}
+// for register-register instruction: REGS[rd] <= ALUOutput
+// for register-immediate instruction: REGS[rt] <= ALUOutput
+// for load instruction: REGS[rt] <= LMD
+			uint32_t rt = MEM_WB.B;
+			uint32_t rd = MEM_WB.rd;  
+	if(MEM_WB.opcode == 0x00)
+		switch(MEM_WB.funct){
+		case 0x20: //ADD
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x21: //ADDU 
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x22: //SUB
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x23: //SUBU
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x24: //AND
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x25: //OR
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x26: //XOR
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		case 0x27: //NOR
+			NEXT_STATE.REGS[rd] = MEM_WB.ALUOutput;
+			break;
+		default:
+		printf("operation not implemented yet wb %x\n", MEM_WB.funct);
+		}
+	else {
+		switch(MEM_WB.opcode){
+			
+			case 0x20://LB
+				NEXT_STATE.REGS[rt] = MEM_WB.LMD;
+				break;
+			case 0x21://LH
+				NEXT_STATE.REGS[rt] = MEM_WB.LMD;
+				break;
+			case 0x23://LW
+				NEXT_STATE.REGS[rt] = MEM_WB.LMD;
+				break;
+			case 0x08: //ADDI
+				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+				break;
+			case 0x09: //ADDIU
+				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+				break;
+			case 0x0A: //SLTI
+				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+				break;
+			case 0x0C: //ANDI
+				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+				break;
+			case 0x0D: //ORI
+				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+				break;
+			case 0x0E: //XORI
+				NEXT_STATE.REGS[rt] = MEM_WB.ALUOutput;
+				break;
+			default:
+				printf("operation not implemented yet wb2\n");
+		}
+	}
+	
 
+
+
+}
 /************************************************************/
 /* memory access (MEM) pipeline stage:                                                          */ 
 /************************************************************/
@@ -343,15 +414,15 @@ void MEM()
 // it is a store instruction, then the value stored in register B is written into memory. The address of
 // memory to be accessed is the value computed in the previous stage and stored in ALUOutput register. 	
 	uint32_t data;
-		MEM_WB.B = EX_MEM.A;
-
+	MEM_WB.B = EX_MEM.A;
 	MEM_WB.B = EX_MEM.B;
 	MEM_WB.rd = EX_MEM.rd;
 	MEM_WB.funct = EX_MEM.funct;
 	MEM_WB.opcode = EX_MEM.opcode;
 
+
 		if(EX_MEM.opcode == 0x00){
-			switch(ID_EX.funct){
+			switch(EX_MEM.funct){
 				case 0x20: //ADD
 					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 					break;
@@ -395,7 +466,7 @@ void MEM()
 					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 					break;
 				default:
-					printf("operation not implemented yet mem\n");
+					printf("operation %x not implemented yet mem\n", EX_MEM.funct);
 			}	
 			return;
 		}
@@ -433,7 +504,7 @@ void MEM()
 				break;
 			default:
 				// put more things here
-				printf("Instruction at 0x%x is not implemented! mem2\n", ID_EX.PC);
+				printf("Instruction at %x is not implemented! mem2\n", EX_MEM.opcode);
 				break;
 
 		}
@@ -499,7 +570,6 @@ void EX()
 	EX_MEM.rd = rd;
 	EX_MEM.funct = function;
 	EX_MEM.shampt = ID_EX.shampt;
-
 	sa = ID_EX.shampt;
 
 	// uint32_t nextPC = ID_EX.PC + 4; 
@@ -834,7 +904,7 @@ void IF()
 
 
 	IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
-	printf(" the current state is %x", CURRENT_STATE.PC);
+	printf(" the current state is %x\n", CURRENT_STATE.PC);
 	IF_ID.PC = CURRENT_STATE.PC + 4;
 	NEXT_STATE.PC = CURRENT_STATE.PC + 4;
 
