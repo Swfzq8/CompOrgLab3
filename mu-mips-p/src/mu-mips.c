@@ -143,7 +143,7 @@ void rdump() {
 	printf("-------------------------------------\n");
 	printf("# Instructions Executed\t: %u\n", INSTRUCTION_COUNT);
 	printf("# Cycles Executed\t: %u\n", CYCLE_COUNT);
-	printf("PC\t: 0x%08x\n", ID_EX.PC);
+	printf("PC\t: 0x%08x\n", CURRENT_STATE.PC);
 	printf("-------------------------------------\n");
 	printf("[Register]\t[Value]\n");
 	printf("-------------------------------------\n");
