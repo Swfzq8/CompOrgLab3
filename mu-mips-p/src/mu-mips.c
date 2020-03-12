@@ -513,8 +513,7 @@ void WB()
 /************************************************************/
 void MEM()
 {
-	/*IMPLEMENT THIS
-	*/
+	/*IMPLEMENT THIS*/
 
 // for load: LMD <= MEM[ALUOutput]
 // for store: MEM[ALUOutput] <= B
@@ -530,85 +529,60 @@ void MEM()
 
 
 		if(EX_MEM.opcode == 0x00){
+
 			switch(EX_MEM.funct){
 
 			case 0x00: //SLL
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] << sa;
-				print_instruction(CURRENT_STATE.PC);
+					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+
 				break;
 			case 0x02: //SRL
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
-				print_instruction(CURRENT_STATE.PC);
+					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+
 				break;
 			case 0x03: //SRA 
-				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 1)
-				{
-					NEXT_STATE.REGS[rd] =  ~(~CURRENT_STATE.REGS[rt] >> sa );
-				}
-				else{
-					NEXT_STATE.REGS[rd] = CURRENT_STATE.REGS[rt] >> sa;
-				}
-				print_instruction(CURRENT_STATE.PC);
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+
 				break;
 
 			case 0x0C: //SYSCALL
-				if(CURRENT_STATE.REGS[2] == 0xa){
-					RUN_FLAG = FALSE;
-					print_instruction(CURRENT_STATE.PC);
-				}
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+
 				break;
 			case 0x10: //MFHI
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.HI;
+
+				MEM_WB.HI = EX_MEM.HI;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x11: //MTHI
-				NEXT_STATE.HI = CURRENT_STATE.REGS[rs];
+				MEM_WB.HI = EX_MEM.HI;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x12: //MFLO
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
+				MEM_WB.LO = EX_MEM.LO;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x13: //MTLO
-				NEXT_STATE.LO = CURRENT_STATE.REGS[rs];
+				MEM_WB.LO = EX_MEM.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x18: //MULT
-				if ((CURRENT_STATE.REGS[rs] & 0x80000000) == 0x80000000){
-					p1 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rs];
-				}else{
-					p1 = 0x00000000FFFFFFFF & CURRENT_STATE.REGS[rs];
-				}
-				if ((CURRENT_STATE.REGS[rt] & 0x80000000) == 0x80000000){
-					p2 = 0xFFFFFFFF00000000 | CURRENT_STATE.REGS[rt];
-				}else{
-					p2 = 0x00000000FFFFFFFF & CURRENT_STATE.REGS[rt];
-				}
-				product = p1 * p2;
-				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
-				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				MEM_WB.LO = EX_MEM.LO;
+				MEM_WB.HI = EX_MEM.HI;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x19: //MULTU
-				product = (uint64_t)CURRENT_STATE.REGS[rs] * (uint64_t)CURRENT_STATE.REGS[rt];
-				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
-				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				MEM_WB.LO = EX_MEM.LO;
+				MEM_WB.HI = EX_MEM.HI;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x1A: //DIV 
-				if(CURRENT_STATE.REGS[rt] != 0)
-				{
-					NEXT_STATE.LO = (int32_t)CURRENT_STATE.REGS[rs] / (int32_t)CURRENT_STATE.REGS[rt];
-					NEXT_STATE.HI = (int32_t)CURRENT_STATE.REGS[rs] % (int32_t)CURRENT_STATE.REGS[rt];
-				}
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x1B: //DIVU
-				if(CURRENT_STATE.REGS[rt] != 0)
-				{
-					NEXT_STATE.LO = CURRENT_STATE.REGS[rs] / CURRENT_STATE.REGS[rt];
-					NEXT_STATE.HI = CURRENT_STATE.REGS[rs] % CURRENT_STATE.REGS[rt];
-				}
+				MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 				print_instruction(CURRENT_STATE.PC);
 				break;
 
@@ -640,6 +614,21 @@ void MEM()
 				case 0x27: //NOR
 					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 					break;
+				case 0x2A: //SLT
+					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+
+				break;
+
+
+
+				default:
+					printf("operation %x not implemented yet mem\n", EX_MEM.funct);
+			}	
+			return;
+		}
+		
+		switch(EX_MEM.opcode){
+
 				case 0x08: //ADDI
 					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 					break;
@@ -658,13 +647,11 @@ void MEM()
 				case 0x0E: //XORI
 					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 					break;
-				default:
-					printf("operation %x not implemented yet mem\n", EX_MEM.funct);
-			}	
-			return;
-		}
-		
-		switch(EX_MEM.opcode){
+			case 0x0F: //LUI
+					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
+				break;
+
+
 			case 0x20: //LB
 				data = mem_read_32(EX_MEM.ALUOutput);
 				MEM_WB.LMD = ((data & 0x000000FF) & 0x80) > 0 ? (data | 0xFFFFFF00) : (data & 0x000000FF);
@@ -785,7 +772,6 @@ void EX()
 				else{
 					EX_MEM.ALUOutput = rt >> sa;
 				}
-				print_instruction(ID_EX.PC);
 				break;
 			case 0x08: //JR
 				// nextPC = rs;
@@ -810,14 +796,13 @@ void EX()
 				break;
 			case 0x11: //MTHI  -???
 				NEXT_STATE.HI = rs;
-				print_instruction(ID_EX.PC);
+				EX_MEM.HI = rs; 
 				break;
 			case 0x12: //MFLO - ???  
-				NEXT_STATE.REGS[rd] = CURRENT_STATE.LO;
-				print_instruction(ID_EX.PC);
+				EX_MEM.ALUOutput = CURRENT_STATE.LO;
 				break;
 			case 0x13: //MTLO - ??? 
-				NEXT_STATE.LO = rs;
+				EX_MEM.LO = rs;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x18: //MULT - ??? 
@@ -832,32 +817,32 @@ void EX()
 					p2 = 0x00000000FFFFFFFF & rt;
 				}
 				product = p1 * p2;
-				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
-				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
-				print_instruction(ID_EX.PC);
+				EX_MEM.LO = (product & 0X00000000FFFFFFFF);
+				EX_MEM.HI = (product & 0XFFFFFFFF00000000)>>32;
 				break;
 			case 0x19: //MULTU ???
 				product = (uint64_t)rs * (uint64_t)rt;
-				NEXT_STATE.LO = (product & 0X00000000FFFFFFFF);
-				NEXT_STATE.HI = (product & 0XFFFFFFFF00000000)>>32;
+				EX_MEM.LO = (product & 0X00000000FFFFFFFF);
+				EX_MEM.HI = (product & 0XFFFFFFFF00000000)>>32;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x1A: //DIV  -???
 				if(rt != 0)
 				{
-					NEXT_STATE.LO = (int32_t)rs / (int32_t)rt;
-					NEXT_STATE.HI = (int32_t)rs % (int32_t)rt;
+					EX_MEM.LO = (int32_t)rs / (int32_t)rt;
+					EX_MEM.HI = (int32_t)rs % (int32_t)rt;
 				}
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x1B: //DIVU -????
 				if(rt != 0)
 				{
-					NEXT_STATE.LO = rs / rt;
-					NEXT_STATE.HI = rs % rt;
+					EX_MEM.LO = rs / rt;
+					EX_MEM.HI = rs % rt;
 				}
 				print_instruction(ID_EX.PC);
 				break;
+
 			case 0x20: //ADD
 				EX_MEM.ALUOutput = rs + rt;
 				print_instruction(ID_EX.PC);
