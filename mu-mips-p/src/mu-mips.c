@@ -352,12 +352,12 @@ void WB()
 				print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x08: //JR
-				NEXT_STATE.PC = MEM_WB.ALUOutput;
-				print_instruction(CURRENT_STATE.PC);
+				//NEXT_STATE.PC = MEM_WB.ALUOutput;
+				//print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x09: //JALR	
-				NEXT_STATE.PC = MEM_WB.ALUOutput;
-				print_instruction(CURRENT_STATE.PC);
+				//NEXT_STATE.PC = MEM_WB.ALUOutput;
+				//print_instruction(CURRENT_STATE.PC);
 				break;
 			case 0x0C: //SYSCALL
 				if(CURRENT_STATE.REGS[2] == 0xa){
@@ -464,6 +464,9 @@ void WB()
 				printf("operation not implemented yet wb2\n");
 		}
 	}
+	show_pipeline();
+	
+	INSTRUCTION_COUNT ++;
 	
 
 
@@ -547,10 +550,6 @@ void MEM()
 				print_instruction(CURRENT_STATE.PC);
 				break;
 
-
-
-
-
 				case 0x20: //ADD
 					MEM_WB.ALUOutput = EX_MEM.ALUOutput;
 					break;
@@ -615,16 +614,20 @@ void MEM()
 
 			case 0x20: //LB
 				data = mem_read_32(EX_MEM.ALUOutput);
+				printf("data value LB: %x ################################\n",data);
 				MEM_WB.LMD = ((data & 0x000000FF) & 0x80) > 0 ? (data | 0xFFFFFF00) : (data & 0x000000FF);
-			//	print_instruction(ID_EX.PC);
+				print_instruction(ID_EX.PC);
 				break;						
 			case 0x21: //LH
 				data = mem_read_32(EX_MEM.ALUOutput);
+				printf("data value LH: %x ##################################\n",data);
 				MEM_WB.LMD = ((data & 0x0000FFFF) & 0x8000) > 0 ? (data | 0xFFFF0000) : (data & 0x0000FFFF);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x23: //LW
-				MEM_WB.ALUOutput = mem_read_32(EX_MEM.ALUOutput);
+				data = mem_read_32(EX_MEM.ALUOutput);
+				MEM_WB.LMD = mem_read_32(EX_MEM.ALUOutput);
+				printf("data value LW: %x ############################\n",data);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x28: //SB
@@ -640,7 +643,8 @@ void MEM()
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x2B: //SW
-				mem_write_32(EX_MEM.ALUOutput,MEM_WB.B);
+				printf("store word #################################\nValue: %x\nREGister: %x\n################################\n",EX_MEM.ALUOutput,CURRENT_STATE.REGS[MEM_WB.B]);
+				mem_write_32(EX_MEM.ALUOutput,CURRENT_STATE.REGS[MEM_WB.B]);
 				print_instruction(ID_EX.PC);
 				break;
 			default:
@@ -693,18 +697,18 @@ void EX()
 
 
 	uint32_t opcode, function, rs, rt, rd, sa, immediate;
-	uint32_t target;
+	//uint32_t target; 
 	uint64_t product, p1, p2;
 	//uint32_t addr; unused variable
 	uint32_t data;  
-	int branch_jump = FALSE;
+	//int branch_jump = FALSE;
 	opcode = ID_EX.opcode;
 	function = ID_EX.funct;
 	rs = ID_EX.A;
 	rt =ID_EX.B;
 	rd =ID_EX.rd;
 	immediate = ID_EX.imm;
-	target = ID_EX.tar;
+	//target = ID_EX.tar;
 	EX_MEM.opcode = opcode;
 	EX_MEM.A = rs;
 	EX_MEM.B = rt;
@@ -728,10 +732,10 @@ void EX()
 			case 0x03: //SRA 
 				if ((rt & 0x80000000) == 1)
 				{
-					EX_MEM.ALUOutput =  ~(~rt >> sa );
+					EX_MEM.ALUOutput =  ~(~CURRENT_STATE.REGS[rt] >> sa );
 				}
 				else{
-					EX_MEM.ALUOutput = rt >> sa;
+					EX_MEM.ALUOutput = CURRENT_STATE.REGS[rt] >> sa;
 				}
 				break;
 			case 0x08: //JR
@@ -924,15 +928,15 @@ void EX()
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x0C: //ANDI
-				EX_MEM.ALUOutput = rs & (immediate & 0x0000FFFF);
+				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] & (immediate & 0x0000FFFF);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x0D: //ORI
-				EX_MEM.ALUOutput = rs | (immediate & 0x0000FFFF);
+				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] | (immediate & 0x0000FFFF);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x0E: //XORI
-				EX_MEM.ALUOutput = rs ^ (immediate & 0x0000FFFF);
+				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] ^ (immediate & 0x0000FFFF);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x0F: //LUI
@@ -940,34 +944,34 @@ void EX()
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x20: //LB
-				data = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				data = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
 				EX_MEM.ALUOutput = data;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x21: //LH
-				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) ;
+				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) ;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x23: //LW
-				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) ;
+				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF)) ;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x28: //SB
-				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
 				// data = mem_read_32( addr);
 				// data = (data & 0xFFFFFF00) | (rt & 0x000000FF);
 				// mem_write_32(addr, data);
 				print_instruction(ID_EX.PC);				
 				break;
 			case 0x29: //SH
-				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
 				// data = mem_read_32( addr);
 				// data = (data & 0xFFFF0000) | (rt & 0x0000FFFF);
 				// mem_write_32(addr, data);
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x2B: //SW
-				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				EX_MEM.ALUOutput = CURRENT_STATE.REGS[rs] + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
 				// mem_write_32(addr, rt);
 				print_instruction(ID_EX.PC);
 				break;
@@ -1025,7 +1029,7 @@ void ID()
 	ID_EX.funct = function;
 	ID_EX.shampt = sa;
 	ID_EX.tar = target;
-	printf("%x",instruction);
+	printf("The current instruction is(1) %x",instruction);
 	
 }
 
@@ -1064,7 +1068,7 @@ void initialize() {
 /* Print the program loaded into memory (in MIPS assembly format)    */ 
 /************************************************************/
 void print_instruction(uint32_t j){
-	printf("the instruction is %x",j);/*IMPLEMENT THIS*/
+	printf("the instruction is %x\n",j);/*IMPLEMENT THIS*/
 }
 
 /************************************************************/
