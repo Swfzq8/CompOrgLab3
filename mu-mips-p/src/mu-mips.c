@@ -331,9 +331,14 @@ void WB()
 // for register-immediate instruction: REGS[rt] <= ALUOutput
 // for load instruction: REGS[rt] <= LMD
 	uint32_t rt = MEM_WB.regA;
-	uint32_t rd = MEM_WB.rd;  
-	
-	
+	uint32_t rd = MEM_WB.rd; 
+	uint32_t line = MEM_WB.IR; 
+	if (line ==12){
+		CURRENT_STATE.REGS[2] = 0xA;
+		if ( CURRENT_STATE.REGS[2] == 0xA){
+		RUN_FLAG = false;
+		}
+	}
 
 	if(MEM_WB.opcode == 0x00)
 		switch(MEM_WB.funct){
@@ -492,6 +497,7 @@ void MEM()
 	MEM_WB.rd = EX_MEM.rd;
 	MEM_WB.funct = EX_MEM.funct;
 	MEM_WB.opcode = EX_MEM.opcode;
+	MEM_WB.IR = EX_MEM.IR;
 
 
 		if(EX_MEM.opcode == 0x00){
@@ -712,6 +718,8 @@ void EX()
 	immediate = ID_EX.imm;
 	//target = ID_EX.tar;
 	EX_MEM.opcode = opcode;
+	EX_MEM.IR = ID_EX.IR;
+//	printf("the value of id_EX is %x",ID_EX.IR);
 	EX_MEM.A = rs;
 	EX_MEM.B = rt;
 	ID_EX.regA = IF_ID.regA;
@@ -1024,7 +1032,7 @@ void ID()
 	sa = (instruction & 0x000007C0) >> 6;
 	immediate = instruction & 0x0000FFFF;
 	target = instruction & 0x03FFFFFF;
-
+	ID_EX.IR = IF_ID.IR;
 	ID_EX.A = CURRENT_STATE.REGS[rs];
 	ID_EX.B = CURRENT_STATE.REGS[rt];
 	ID_EX.regA = rs;
