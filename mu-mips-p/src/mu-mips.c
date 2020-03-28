@@ -6,6 +6,20 @@
 #include <stdbool.h>
 #include "mu-mips.h"
 void print_instruction(uint32_t);
+
+
+uint32_t sign_extension_32(uint32_t val) {
+	//check on the sign and repicate first bit
+	if ((val & 0x00008000) == 0x00008000) {
+		//negative case, fill first 16 with 1s
+		val |= 0xFFFF0000;
+	}
+	else {
+		//positive case, fill first 16 with 0s
+		val &= 0x0000FFFF;
+	}
+	return val;
+}
 /***************************************************************/
 /* Print out a list of commands available                                                                  */
 /***************************************************************/
@@ -339,7 +353,7 @@ void WB()
 		RUN_FLAG = false;
 		}
 	}
-
+	printf("MEM_WB.opcode is %x",MEM_WB.opcode);
 	if(MEM_WB.opcode == 0x00)
 		switch(MEM_WB.funct){
 
@@ -498,8 +512,8 @@ void MEM()
 	MEM_WB.funct = EX_MEM.funct;
 	MEM_WB.opcode = EX_MEM.opcode;
 	MEM_WB.IR = EX_MEM.IR;
-
-
+	printf("the value of EX_MEM.ALUOutput is %x",EX_MEM.ALUOutput);
+//	printf("current state is %x ",CURRENT_STATE.REGS[ID_EX.A]);
 		if(EX_MEM.opcode == 0x00){
 
 			switch(EX_MEM.funct){
@@ -639,20 +653,24 @@ void MEM()
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x28: //SB
+				printf("STORE BITE");
 				data = mem_read_32(EX_MEM.ALUOutput);
-				EX_MEM.B = (data & 0xFFFFFF00) | (EX_MEM.B & 0x000000FF);
-				mem_write_32(EX_MEM.ALUOutput, EX_MEM.B);
+				MEM_WB.B = (data & 0xFFFFFF00) | (EX_MEM.B & 0x000000FF);
+				//mem_write_32(EX_MEM.ALUOutput, 1);
+				//mem_write_32(EX_MEM.ALUOutput, CURRENT_STATE.REGS[EX_MEM.B]);
 				print_instruction(ID_EX.PC);				
 				break;
 			case 0x29: //SH
 				data = mem_read_32(EX_MEM.ALUOutput);
-				EX_MEM.B = (data & 0xFFFF0000) | (EX_MEM.B & 0x0000FFFF);
-				mem_write_32(EX_MEM.ALUOutput, MEM_WB.B);
+				printf("STORE HALFWORD");
+				MEM_WB.B = (data & 0xFFFF0000) | (EX_MEM.B & 0x0000FFFF);
+			//	mem_write_32(EX_MEM.ALUOutput, CURRENT_STATE.REGS[MEM_WB.B]);
+	
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x2B: //SW
 				printf("store word #################################\nValue: %x\nREGister: %x\n################################\n",EX_MEM.ALUOutput,CURRENT_STATE.REGS[MEM_WB.B]);
-				mem_write_32(EX_MEM.ALUOutput,CURRENT_STATE.REGS[EX_MEM.B]);
+			 //     mem_write_32(EX_MEM.ALUOutput,CURRENT_STATE.REGS[EX_MEM.B]);
 				print_instruction(ID_EX.PC);
 				break;
 			default:
@@ -728,8 +746,11 @@ void EX()
 	EX_MEM.funct = function;
 	EX_MEM.shampt = ID_EX.shampt;
 	sa = ID_EX.shampt;
-
+	if (opcode == 0x9) 
+	printf("the opcode value is equal to %x",opcode);
 	// uint32_t nextPC = ID_EX.PC + 4; 
+	//printf("writing memory the value is %x",CURRENT_STATE.REGS[ID_EX.A] + ID_EX.imm);
+	
 
 	if(opcode == 0x00){
 		switch(function){
@@ -970,21 +991,29 @@ void EX()
 				break;
 			case 0x28: //SB
 				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
-				// data = mem_read_32( addr);
-				// data = (data & 0xFFFFFF00) | (rt & 0x000000FF);
-				// mem_write_32(addr, data);
+			//	 data = mem_read_32( addr);
+			//	 data = (data & 0xFFFFFF00) | (rt & 0x000000FF);
+			//	 mem_write_32(EX_MEM.ALUOutput,CURRENT_STATE.REGS[EX_MEM.B] & 0x000000FF );
+				EX_MEM.ALUOutput = (CURRENT_STATE.REGS[ID_EX.A] + ID_EX.imm);
+                		EX_MEM.B = ID_EX.B;	
 				print_instruction(ID_EX.PC);				
 				break;
 			case 0x29: //SH
-				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
-				// data = mem_read_32( addr);
-				// data = (data & 0xFFFF0000) | (rt & 0x0000FFFF);
-				// mem_write_32(addr, data);
+			//	EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+			//	 data = mem_read_32( addr);
+			//	 data = (data & 0xFFFF0000) | (rt & 0x0000FFFF);
+				  mem_write_32(EX_MEM.ALUOutput,CURRENT_STATE.REGS[EX_MEM.B] & 0x0000FFFF );
+				EX_MEM.ALUOutput = (CURRENT_STATE.REGS[ID_EX.A] + ID_EX.imm);
+               			 EX_MEM.B = ID_EX.B;
 				print_instruction(ID_EX.PC);
 				break;
 			case 0x2B: //SW
-				EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
-				// mem_write_32(addr, rt);
+			//	EX_MEM.ALUOutput = rs + ( (immediate & 0x8000) > 0 ? (immediate | 0xFFFF0000) : (immediate & 0x0000FFFF));
+				printf("STORE WORD THE VALUE OF the write is %x",EX_MEM.B);
+			//	 mem_write_32(EX_MEM.ALUOutput,EX_MEM.B);
+				EX_MEM.ALUOutput = (CURRENT_STATE.REGS[ID_EX.A] + ID_EX.imm);
+				printf("EX_MEM.ALUOUTPUT VALUE IS \n \n %x",EX_MEM.ALUOutput);
+               			 EX_MEM.B = ID_EX.B;
 				print_instruction(ID_EX.PC);
 				break;
 			default:
@@ -1015,7 +1044,7 @@ void ID()
 // register will be used in the next stage (i.e., EX).h
 
 
-
+/*	
 	uint32_t instruction = 0;
 	instruction = IF_ID.IR;
 
@@ -1023,7 +1052,7 @@ void ID()
 	
 	
 	
-	
+	printf("the instruction is 0x%x \n",instruction);
 	opcode = (instruction & 0xFC000000) >> 26;
 	function = instruction & 0x0000003F;
 	rs = (instruction & 0x03E00000) >> 21;
@@ -1033,10 +1062,11 @@ void ID()
 	immediate = instruction & 0x0000FFFF;
 	target = instruction & 0x03FFFFFF;
 	ID_EX.IR = IF_ID.IR;
-	ID_EX.A = CURRENT_STATE.REGS[rs];
-	ID_EX.B = CURRENT_STATE.REGS[rt];
-	ID_EX.regA = rs;
-	ID_EX.regB = rt;
+	ID_EX.PC = IF_ID.PC;
+	ID_EX.A = rs;
+	ID_EX.B = rt;
+//	ID_EX.regA = rt;
+//	ID_EX.regB = rs;
 	ID_EX.imm = (int) immediate;
 	ID_EX.opcode = opcode;
 	ID_EX.rd = rd;
@@ -1044,7 +1074,44 @@ void ID()
 	ID_EX.shampt = sa;
 	ID_EX.tar = target;
 	printf("The current instruction is(1) %x",instruction);
-	
+	printf("\n the value of EX_MEM.ALUOuutput is %x",CURRENT_STATE.REGS[ID_EX.A]);
+*/
+ID_EX = registerpass(IF_ID);
+ uint32_t line = ID_EX.IR;
+    uint32_t rs = 0;
+    uint32_t rt = 0;
+    uint32_t sa = 0;
+    uint32_t immediate = 0;
+    uint32_t op = 0;
+
+ //   ID_EX.IR = IF_ID.IR;
+ //   ID_EX.PC = IF_ID.PC;
+    if ((line | 0x03FFFFFF) ==  0x03FFFFFF){
+        rs = (line & 0x03E00000) >> 21;
+        rt = (line & 0x001F0000) >> 16;
+        sa = (line & 0x000007C0) >> 6;
+    } else {
+        rs = (line & 0x03E00000) >> 21;
+        rt = (line & 0x001F0000) >> 16;
+        immediate = line & 0x0000FFFF;
+        op = line & 0xFC000000;
+        if (op == 0x30000000 || op == 0x34000000 || op == 0x38000000){
+            //in here, ANDI, ORI, XORI are 0 extended
+            //do not use the sign extension function in this case
+            ID_EX.imm = immediate;
+        } else {
+            ID_EX.imm = sign_extension_32(immediate);
+        }
+    }
+  printf("the value of EX_MEM.ALUOuutput is %x",CURRENT_STATE.REGS[ID_EX.A]);  
+    ID_EX.A = rs;
+    ID_EX.B = rt;
+    ID_EX.shampt = sa;
+//printf("the value of EX_MEM.ALUOuutput is %x",ID_EX.A);
+printf("the value of EX_MEM.ALUOuutput is %x",CURRENT_STATE.REGS[ID_EX.A]);
+    
+    
+
 }
 
 /************************************************************/
@@ -1061,9 +1128,10 @@ void IF()
 
 
 	IF_ID.IR = mem_read_32(CURRENT_STATE.PC);
-	printf(" the current state is %x\n", CURRENT_STATE.PC);
+//	printf(" the current state is %x\n", CURRENT_STATE.PC);
 	IF_ID.PC = CURRENT_STATE.PC + 4;
 	NEXT_STATE.PC = CURRENT_STATE.PC + 4;
+	
 
 }
 
@@ -1121,6 +1189,20 @@ MEM/WB.IR value
 MEM/WB.ALUOutput value
 MEM/WB.LMD value
 */
+}
+CPU_Pipeline_Reg registerpass(CPU_Pipeline_Reg last){
+    CPU_Pipeline_Reg next;
+    next.IR = last.IR;
+    next.A = last.A;
+    next.B = last.B;
+    next.ALUOutput = last.ALUOutput;
+    next.HI = last.HI;
+    next.LO = last.LO;
+    next.imm = last.imm;
+    next.LMD = last.IR;
+    next.PC = last.PC;
+    next.shampt = last.shampt;
+    return next;
 }
 /***************************************************************/
 /* main                                                                                                                                   */
