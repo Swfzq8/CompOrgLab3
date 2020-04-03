@@ -60,8 +60,6 @@ typedef struct CPU_Pipeline_Reg_Struct{
 	uint32_t funct;
 	uint32_t shampt;
 	uint32_t tar;
-	uint32_t regA;
-	uint32_t regB;
 
 } CPU_Pipeline_Reg;
 
@@ -111,4 +109,6 @@ void IF();/*IMPLEMENT THIS*/
 void show_pipeline();/*IMPLEMENT THIS*/
 void initialize();
 void print_program(); /*IMPLEMENT THIS*/
+CPU_Pipeline_Reg registerpass(CPU_Pipeline_Reg last);
+void print_instruction(uint32_t line);
 
